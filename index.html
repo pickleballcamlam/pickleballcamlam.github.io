@@ -680,9 +680,11 @@
           <p class="form-error" id="memberError" role="alert" hidden></p>
           <div class="form-actions">
             <button type="button" class="btn-ghost" id="cancelRegBtn">Huỷ</button>
-            <button type="submit" class="btn-accent">Đăng ký thành viên</button>
+            <button type="submit" class="btn-accent" id="submitRegBtn">Đăng ký thành viên</button>
           </div>
         </form>
+
+        <div class="status-ok" id="memberSuccess" role="status" style="margin-top:12px" hidden></div>
 
         <div class="search-box">
           <label class="sr-only" for="member-search">Tìm thành viên</label>
@@ -790,6 +792,26 @@
       });
 
       /* ---------------- Mục Thành viên ---------------- */
+      // Bộ nhận đăng ký thành viên (Apps Script) — đăng ký được lưu thật về bảng tính + Drive của BTC.
+      var REG_ENDPOINT = "https://script.google.com/macros/s/AKfycbxf2UFn4ZHM8BNRnQNvIpEtHZFwKfwp1z3-gSAEzrFccegWMUw64zCI3fdy6gyS0xtV/exec";
+
+      // Lấy FILE_ID của Drive từ photoLink (dạng file/d/<ID>/view, open?id=<ID>, uc?id=<ID>…)
+      function driveFileId(link) {
+        if (!link) return "";
+        var s = String(link);
+        var m = s.match(/\/d\/([a-zA-Z0-9_-]+)/);
+        if (m) return m[1];
+        m = s.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+        if (m) return m[1];
+        if (/^[a-zA-Z0-9_-]{10,}$/.test(s.trim())) return s.trim();
+        return "";
+      }
+      // Ảnh thumbnail của Drive từ photoLink
+      function driveThumb(link) {
+        var id = driveFileId(link);
+        return id ? "https://drive.google.com/thumbnail?id=" + id + "&sz=w400" : "";
+      }
+
       var memberGrid = document.getElementById("memberGrid");
       var memberEmpty = document.getElementById("memberEmpty");
       var memberCount = document.getElementById("memberCount");
@@ -817,8 +839,13 @@
           if (m.phone) meta += '<p>📞 <a href="tel:' + esc(m.phone.replace(/\s+/g, "")) + '">' + esc(m.phone) + "</a></p>";
           if (m.address) meta += "<p>🏠 " + esc(m.address) + "</p>";
           if (m.club) meta += "<p>🏓 Đang chơi: " + esc(m.club) + "</p>";
+          // Có ảnh đại diện thật (photoLink trên Drive) thì hiện ảnh thumbnail, chưa có ảnh mới hiện chữ cái đầu.
+          var thumb = m.photoLink ? driveThumb(m.photoLink) : "";
+          var avatarHTML = thumb
+            ? '<img class="avatar avatar-img" src="' + esc(thumb) + '" alt="Ảnh đại diện của ' + esc(m.name) + '" loading="lazy" />'
+            : '<span class="avatar ' + (m.gender === "F" ? "f" : "m") + '" aria-hidden="true">' + esc(initial) + "</span>";
           card.innerHTML =
-            '<div class="avatar-col"><span class="avatar ' + (m.gender === "F" ? "f" : "m") + '" aria-hidden="true">' + esc(initial) + "</span></div>" +
+            '<div class="avatar-col">' + avatarHTML + "</div>" +
             '<div class="member-main">' +
               '<div class="member-name-row"><span class="member-name"></span><span class="member-gender">' + genderLabel(m.gender) + "</span>" +
               (m.isNew ? '<span class="new-tag">Vừa đăng ký</span>' : "") + "</div>" +
@@ -826,6 +853,17 @@
               (meta ? '<div class="member-meta">' + meta + "</div>" : "") +
             "</div>";
           card.querySelector(".member-name").textContent = m.name;
+          // Ảnh Drive lỗi/không tải được thì quay về chữ cái đầu, không để ô trống.
+          var avatarImg = card.querySelector(".avatar-img");
+          if (avatarImg) {
+            avatarImg.addEventListener("error", function () {
+              var span = document.createElement("span");
+              span.className = "avatar " + (m.gender === "F" ? "f" : "m");
+              span.setAttribute("aria-hidden", "true");
+              span.textContent = initial;
+              avatarImg.replaceWith(span);
+            });
+          }
           memberGrid.appendChild(card);
         });
         memberEmpty.hidden = shown !== 0;
@@ -862,8 +900,55 @@
         avatarPreview = img;
       });
 
+      var memberSuccess = document.getElementById("memberSuccess");
+      var submitRegBtn = document.getElementById("submitRegBtn");
+      var regSending = false;
+
+      function resetAvatarPreview() {
+        if (avatarURL) { URL.revokeObjectURL(avatarURL); avatarURL = null; }
+        var span = document.createElement("span");
+        span.className = "avatar-placeholder";
+        span.id = "avatarPreview";
+        span.setAttribute("aria-hidden", "true");
+        span.textContent = "📷";
+        avatarPreview.replaceWith(span);
+        avatarPreview = span;
+      }
+
+      // Nén ảnh phía client trước khi gửi: thu về tối đa ~800px, JPEG chất lượng ~0.8 cho nhẹ.
+      function compressPhoto(file) {
+        return new Promise(function (resolve) {
+          if (!file) { resolve({ data: "", name: "", type: "" }); return; }
+          var url = URL.createObjectURL(file);
+          var img = new Image();
+          img.onload = function () {
+            URL.revokeObjectURL(url);
+            var max = 800;
+            var w = img.naturalWidth || max, h = img.naturalHeight || max;
+            var scale = Math.min(1, max / Math.max(w, h));
+            var canvas = document.createElement("canvas");
+            canvas.width = Math.max(1, Math.round(w * scale));
+            canvas.height = Math.max(1, Math.round(h * scale));
+            canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+            var base = String(file.name || "avatar").replace(/\.[^.]+$/, "");
+            resolve({ data: canvas.toDataURL("image/jpeg", 0.8), name: base + ".jpg", type: "image/jpeg" });
+          };
+          img.onerror = function () {
+            URL.revokeObjectURL(url);
+            var reader = new FileReader();
+            reader.onload = function () {
+              resolve({ data: String(reader.result || ""), name: file.name || "avatar", type: file.type || "image/jpeg" });
+            };
+            reader.onerror = function () { resolve({ data: "", name: "", type: "" }); };
+            reader.readAsDataURL(file);
+          };
+          img.src = url;
+        });
+      }
+
       memberForm.addEventListener("submit", function (e) {
         e.preventDefault();
+        if (regSending) return;
         var name = document.getElementById("rm-name").value.trim();
         var phone = document.getElementById("rm-phone").value.trim();
         if (!name || !phone) {
@@ -872,20 +957,75 @@
           return;
         }
         memberError.hidden = true;
-        MEMBERS.unshift({
-          name: name,
-          gender: document.getElementById("rm-gender").value,
-          rating: null,
-          phone: phone,
-          address: document.getElementById("rm-address").value.trim(),
-          club: document.getElementById("rm-club").value.trim(),
-          isNew: true
+        memberSuccess.hidden = true;
+
+        var gender = document.getElementById("rm-gender").value;
+        var birthdate = document.getElementById("rm-birth").value;
+        var address = document.getElementById("rm-address").value.trim();
+        var club = document.getElementById("rm-club").value.trim();
+        var photoFile = avatarInput.files && avatarInput.files[0] ? avatarInput.files[0] : null;
+
+        regSending = true;
+        submitRegBtn.disabled = true;
+        submitRegBtn.textContent = "Đang gửi đăng ký…";
+
+        compressPhoto(photoFile).then(function (photo) {
+          var payload = {
+            name: name,
+            phone: phone,
+            gender: gender,
+            birthdate: birthdate,
+            address: address,
+            club: club,
+            photoData: photo.data,
+            photoName: photo.name,
+            photoType: photo.type
+          };
+          // Gửi JSON tới Apps Script (Content-Type text/plain để tránh preflight CORS mà Apps Script không xử lý).
+          return fetch(REG_ENDPOINT, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify(payload)
+          });
+        }).then(function (res) {
+          return res.json().catch(function () { return null; }).then(function (data) {
+            if (!data || data.ok !== true) {
+              var detail = data && (data.error || data.message) ? " (" + (data.error || data.message) + ")" : "";
+              throw new Error("server" + detail);
+            }
+            return data;
+          });
+        }).then(function (data) {
+          var photoLink = data.photoLink || "";
+          MEMBERS.unshift({
+            name: name,
+            gender: gender,
+            rating: null,
+            phone: phone,
+            birthdate: birthdate,
+            address: address,
+            club: club,
+            photoLink: photoLink,
+            isNew: true
+          });
+          searchInput.value = "";
+          renderMembers();
+          setRegOpen(false);
+          memberForm.reset();
+          resetAvatarPreview();
+          memberSuccess.textContent = "✅ Đăng ký thành công! Chào mừng " + name + " gia nhập Cộng Đồng Pickleball Cam Lâm. Thông tin của anh/chị đã được lưu và hiện ở đầu danh sách thành viên bên dưới. Điểm trình sẽ do Ban tổ chức chấm và cập nhật sau.";
+          memberSuccess.hidden = false;
+          memberSuccess.scrollIntoView({ behavior: "smooth", block: "start" });
+        }).catch(function () {
+          // Lỗi mạng hoặc máy chủ từ chối: báo rõ, giữ nguyên form để anh/chị thử lại — không mất dữ liệu đã nhập.
+          memberError.textContent = "Đăng ký chưa thành công — có thể do mạng chập chờn hoặc máy chủ đang bận. Anh/chị kiểm tra lại kết nối rồi bấm “Đăng ký thành viên” thử lại nhé. Thông tin đã nhập vẫn còn nguyên, không bị mất.";
+          memberError.hidden = false;
+          memberError.scrollIntoView({ behavior: "smooth", block: "center" });
+        }).then(function () {
+          regSending = false;
+          submitRegBtn.disabled = false;
+          submitRegBtn.textContent = "Đăng ký thành viên";
         });
-        searchInput.value = "";
-        renderMembers();
-        setRegOpen(false);
-        memberForm.reset();
-        memberGrid.scrollIntoView({ behavior: "smooth", block: "start" });
       });
 
       renderMembers();
