@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="light dark" />
     <link rel="icon" href="data:," />
-    <title>Demo Trang Công Khai — Cộng Đồng Pickleball Cam Lâm</title>
+    <title>Cộng Đồng Pickleball Cam Lâm</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
@@ -59,7 +59,7 @@
       }
       .shadow-sm { box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); }
 
-      /* ---------- Thanh địa chỉ mô phỏng trình duyệt (chỉ có ở bản demo) ---------- */
+      /* ---------- Thanh địa chỉ mô phỏng trình duyệt ---------- */
       .browserbar { max-width: 72rem; margin: 0 auto; padding: 12px 16px 0; }
       .browserbar-inner {
         background: var(--surface);
@@ -83,13 +83,6 @@
         white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
       }
       .addr svg { flex: none; }
-      .demo-chip {
-        flex: none;
-        font-size: 0.72rem; font-weight: 800;
-        letter-spacing: 0.06em; text-transform: uppercase;
-        background: var(--ball); color: var(--ball-ink);
-        border-radius: 999px; padding: 5px 10px;
-      }
       @media (max-width: 480px) {
         .dots { display: none; }
         .addr { font-size: 0.8rem; padding: 7px 11px; }
@@ -173,7 +166,6 @@
       @media (min-width: 1280px) { main, .pagefoot { max-width: 72rem; } }
       main { padding-top: 16px; padding-bottom: 40px; }
       .pagefoot { padding-bottom: 32px; text-align: center; font-size: 12px; color: var(--dim); }
-      .pagefoot .demo-note { margin-top: 6px; }
 
       .card {
         border-radius: 16px;
@@ -553,7 +545,7 @@
     </style>
   </head>
   <body>
-    <!-- Thanh địa chỉ: cho anh thấy trang sẽ hiện dưới tên miền như thế nào (chỉ có ở bản demo) -->
+    <!-- Thanh địa chỉ: hiện tên miền của trang -->
     <div class="browserbar" aria-hidden="true">
       <div class="browserbar-inner">
         <span class="dots"><i></i><i></i><i></i></span>
@@ -561,7 +553,6 @@
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 10V8a5 5 0 0 1 10 0v2" stroke="currentColor" stroke-width="2.4"/><rect x="4" y="10" width="16" height="10" rx="2.5" fill="currentColor"/></svg>
           camlampickleball.dpdns.org
         </span>
-        <span class="demo-chip">Bản demo</span>
       </div>
     </div>
 
@@ -638,7 +629,7 @@
       <section id="tab-members" hidden>
         <div class="card shadow-sm">
           <h2 class="tab-title">👥 Vận động viên của cộng đồng</h2>
-          <p class="tab-desc">Thành viên tự đăng ký với ảnh đại diện, số điện thoại, địa chỉ và hội sân đang chơi. Điểm trình chính thức do <span class="strong">Ban tổ chức chấm</span> để ghép cặp và xếp giải công bằng. Hiện hội có <b id="memberCount">16</b> thành viên trong danh sách này.</p>
+          <p class="tab-desc">Thành viên tự đăng ký với ảnh đại diện, số điện thoại, địa chỉ và hội sân đang chơi. Điểm trình chính thức do <span class="strong">Ban tổ chức chấm</span> để ghép cặp và xếp giải công bằng. Hiện hội có <b id="memberCount">52</b> thành viên trong danh sách này.</p>
         </div>
 
         <button type="button" class="cta-ball shadow-sm" id="toggleRegBtn" aria-expanded="false">🙋 Đăng ký thành viên</button>
@@ -709,29 +700,64 @@
 
     <footer class="pagefoot">
       Cộng đồng Pickleball Cam Lâm · Gắn kết cộng đồng - Lan tỏa đam mê
-      <div class="demo-note">Bản demo xem thử giao diện — điểm trình là điểm mẫu, trang thật sẽ lấy đúng điểm BTC chấm trong app chấm trình.</div>
     </footer>
 
     <script>
-      // Danh sách VĐV mẫu cho bản demo (tên lấy từ danh sách thành viên cộng đồng).
-      // Điểm trình là ĐIỂM MẪU để xem thử — bản thật lấy từ app chấm trình của BTC.
+      // Danh sách 52 thành viên thật của Cộng Đồng Pickleball Cam Lâm (theo thứ tự đăng ký).
+      // Tất cả đều chưa được BTC chấm điểm trình — điểm sẽ cập nhật khi BTC chấm trong app chấm trình.
       var MEMBERS = [
-        { name: "Trần Nhất Luân",        gender: "M", rating: 3.42, club: "Bo&Boy" },
-        { name: "Hoàng Quốc Bảo",       gender: "M", rating: 3.85, club: "Bo&Boy" },
-        { name: "Vũ Nguyễn (James)",    gender: "M", rating: 3.67, club: "Campick" },
-        { name: "Phan Thành Nhất",      gender: "M", rating: 3.21, club: "Bo&Boy" },
-        { name: "Lê Duy Khoa",          gender: "M", rating: 2.94, club: "Campick" },
-        { name: "Đặng Trọng Nam",       gender: "M", rating: 3.08, club: "" },
-        { name: "Bùi Văn Lanh",         gender: "M", rating: 2.76, club: "" },
-        { name: "Nguyễn Quốc Hiệu",     gender: "M", rating: 3.55, club: "" },
-        { name: "Trần Minh Khánh",      gender: "M", rating: 2.63, club: "Bo&Boy" },
-        { name: "Nguyễn Hữu Khánh",     gender: "M", rating: 2.88, club: "Lộc Pickleball" },
-        { name: "Huỳnh Thị Quỳnh Giao", gender: "F", rating: 2.41, club: "Bo&Boy" },
-        { name: "Nguyễn Thị Ngọc Trúc", gender: "F", rating: 2.18, club: "" },
-        { name: "Đinh Phượng Thu Thảo", gender: "F", rating: 2.55, club: "Tự do" },
-        { name: "Võ Thị Thảo Nguyên",   gender: "F", rating: 2.32, club: "Campick" },
-        { name: "Nguyễn Hoài Thanh",    gender: "F", rating: 2.07, club: "Lộc Pickleball" },
-        { name: "Nhiên",                gender: "F", rating: 1.86, club: "Campick" }
+        { name: "Tuấn Decor",           gender: "M", rating: null, club: "Tự do" },
+        { name: "Trần Nhất Luân",       gender: "M", rating: null, club: "Bo&Boy" },
+        { name: "Hieu Nguyen",          gender: "M", rating: null, club: "Bo&Boy" },
+        { name: "Phan Thành Nhất",      gender: "M", rating: null, club: "Bo&Boy" },
+        { name: "Lê Duy Khoa",          gender: "M", rating: null, club: "Campick" },
+        { name: "Đặng Trọng Nam",       gender: "M", rating: null, club: "Bo&Boy, Campick" },
+        { name: "Hoàng Quốc Bảo",       gender: "M", rating: null, club: "Bo&Boy" },
+        { name: "Bùi Văn Lanh",         gender: "M", rating: null, club: "Campick" },
+        { name: "Wee Nguyen",           gender: "M", rating: null, club: "Lộc Pickleball" },
+        { name: "Trần Xuân Duy",        gender: "M", rating: null, club: "Bo&Boy" },
+        { name: "Quốc Võ",              gender: "M", rating: null, club: "Tự do" },
+        { name: "Khánh Phú",            gender: "M", rating: null, club: "Lộc Pickleball" },
+        { name: "Nguyễn Hữu Khánh",     gender: "M", rating: null, club: "Lộc Pickleball" },
+        { name: "Nguyễn Thanh Phong",   gender: "M", rating: null, club: "Lộc Pickleball" },
+        { name: "Nguyễn Thanh Hiền",    gender: "M", rating: null, club: "Lộc Pickleball" },
+        { name: "Trương Bảo",           gender: "M", rating: null, club: "Bo&Boy" },
+        { name: "Kha",                  gender: "M", rating: null, club: "Campick" },
+        { name: "Trần Minh Khánh",      gender: "M", rating: null, club: "Bo&Boy" },
+        { name: "Võ Thị Thảo Nguyên",   gender: "F", rating: null, club: "Campick" },
+        { name: "Nhiên",                gender: "M", rating: null, club: "Campick" },
+        { name: "Nguyễn Châu Chương",   gender: "M", rating: null, club: "Bo&Boy, Campick" },
+        { name: "Lê Hùng Cường",        gender: "M", rating: null, club: "Campick" },
+        { name: "Võ Kế Thành",          gender: "M", rating: null, club: "Lộc Pickleball" },
+        { name: "Tôn Thất Hải Dương",   gender: "M", rating: null, club: "Tự do" },
+        { name: "Nguyễn Hoài Thanh",    gender: "F", rating: null, club: "Lộc Pickleball" },
+        { name: "Huỳnh Thị Quỳnh Giao", gender: "F", rating: null, club: "Bo&Boy" },
+        { name: "Văn Long",             gender: "M", rating: null, club: "Bo&Boy, Campick" },
+        { name: "Đinh Phượng Thu Thảo", gender: "F", rating: null, club: "Tự do" },
+        { name: "Nguyễn Thị Ngọc Trúc", gender: "F", rating: null, club: "" },
+        { name: "Nguyễn Quốc Sang",     gender: "M", rating: null, club: "" },
+        { name: "Dương Minh Tuấn",      gender: "M", rating: null, club: "Tự do" },
+        { name: "Đỗ Thị Minh Thư",      gender: "F", rating: null, club: "Campick" },
+        { name: "Phương Võ",            gender: "F", rating: null, club: "Campick" },
+        { name: "Vũ Thị Hương",         gender: "F", rating: null, club: "" },
+        { name: "Nguyễn Anh Dũng",      gender: "M", rating: null, club: "Tự do" },
+        { name: "Trần Nam",             gender: "M", rating: null, club: "Pikachu" },
+        { name: "Bồ Công Anh",          gender: "F", rating: null, club: "Tự do" },
+        { name: "Trần Nguyễn Đức Nhân", gender: "M", rating: null, club: "" },
+        { name: "Chà My",               gender: "F", rating: null, club: "Bo&Boy" },
+        { name: "Quân Maruko",          gender: "M", rating: null, club: "Maruko Cam Ranh" },
+        { name: "Như Quỳnh",            gender: "F", rating: null, club: "Campick" },
+        { name: "Lương Công Danh",      gender: "M", rating: null, club: "Tự do" },
+        { name: "Tấn Nam",              gender: "M", rating: null, club: "Lộc Pickleball" },
+        { name: "Phạm Văn Hoàng",       gender: "M", rating: null, club: "Bo&Boy" },
+        { name: "Sỹ",                   gender: "M", rating: null, club: "Thế Trâm" },
+        { name: "Võ Thị Thanh Hà",      gender: "F", rating: null, club: "Mỹ Ca" },
+        { name: "Vũ Nguyễn (James)",    gender: "M", rating: null, club: "Campick" },
+        { name: "Hương Nhật",           gender: "F", rating: null, club: "Tự do" },
+        { name: "Từ Quang Hiếu",        gender: "M", rating: null, club: "Lộc Pickleball" },
+        { name: "Hoàng Anh Toàn",       gender: "M", rating: null, club: "" },
+        { name: "Từ Đức Tâm",           gender: "M", rating: null, club: "Army" },
+        { name: "Đặng Thái Sơn",        gender: "M", rating: null, club: "Golden Bay" }
       ];
 
       // Định dạng điểm như app: 3,42 · 8,5 · 10
