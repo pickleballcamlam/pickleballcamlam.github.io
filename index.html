@@ -59,35 +59,6 @@
       }
       .shadow-sm { box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); }
 
-      /* ---------- Thanh địa chỉ mô phỏng trình duyệt ---------- */
-      .browserbar { max-width: 72rem; margin: 0 auto; padding: 12px 16px 0; }
-      .browserbar-inner {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        padding: 8px 10px;
-        display: flex; align-items: center; gap: 10px;
-      }
-      .dots { display: flex; gap: 6px; flex: none; }
-      .dots i { width: 11px; height: 11px; border-radius: 50%; display: block; }
-      .dots i:nth-child(1) { background: #e0655f; }
-      .dots i:nth-child(2) { background: #e8b93e; }
-      .dots i:nth-child(3) { background: #4caf7d; }
-      .addr {
-        flex: 1; min-width: 0;
-        display: flex; align-items: center; gap: 7px;
-        background: var(--surface-alt);
-        border-radius: 999px;
-        padding: 7px 14px;
-        font-size: 0.92rem; font-weight: 600; color: var(--text);
-        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      }
-      .addr svg { flex: none; }
-      @media (max-width: 480px) {
-        .dots { display: none; }
-        .addr { font-size: 0.8rem; padding: 7px 11px; }
-      }
-
       /* ---------- Banner đầu trang (giống app) ---------- */
       .banner-bg {
         background: linear-gradient(150deg, #0d264e 0%, #163c63 48%, #2c6580 100%);
@@ -545,17 +516,6 @@
     </style>
   </head>
   <body>
-    <!-- Thanh địa chỉ: hiện tên miền của trang -->
-    <div class="browserbar" aria-hidden="true">
-      <div class="browserbar-inner">
-        <span class="dots"><i></i><i></i><i></i></span>
-        <span class="addr">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 10V8a5 5 0 0 1 10 0v2" stroke="currentColor" stroke-width="2.4"/><rect x="4" y="10" width="16" height="10" rx="2.5" fill="currentColor"/></svg>
-          camlampickleball.dpdns.org
-        </span>
-      </div>
-    </div>
-
     <!-- Banner đầu trang: dùng đúng ảnh banner của app -->
     <div class="banner-bg">
       <h1 class="sr-only">Cộng Đồng Pickleball Cam Lâm</h1>
